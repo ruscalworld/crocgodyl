@@ -13,6 +13,7 @@ type Egg struct {
 	Nest         int               `json:"nest"`
 	Author       string            `json:"author"`
 	Description  string            `json:"description"`
+	DockerImage  string            `json:"docker_image"`
 	DockerImages map[string]string `json:"docker_images"`
 	Config       struct {
 		Files   map[string]any `json:"files"`
