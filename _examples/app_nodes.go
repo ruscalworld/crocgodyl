@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	croc "github.com/parkervcp/crocgodyl"
+	croc "github.com/ruscalworld/crocgodyl"
 )
 
 func main() {
