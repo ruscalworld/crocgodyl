@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -298,8 +299,8 @@ type Allocation struct {
 	Assigned bool   `json:"assigned"`
 }
 
-func (a *Application) GetNodeAllocations(node int) ([]*Allocation, error) {
-	req := a.newRequest("GET", fmt.Sprintf("/nodes/%d/allocations", node), nil)
+func (a *Application) GetNodeAllocations(node int, query url.Values) ([]*Allocation, error) {
+	req := a.newRequest("GET", fmt.Sprintf("/nodes/%d/allocations?%s", node, query.Encode()), nil)
 	res, err := a.Http.Do(req)
 	if err != nil {
 		return nil, err
