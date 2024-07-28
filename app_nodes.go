@@ -51,8 +51,8 @@ func (n *Node) UpdateDescriptor() *UpdateNodeDescriptor {
 	}
 }
 
-func (a *Application) GetNodes() ([]*Node, error) {
-	req := a.newRequest("GET", "/nodes", nil)
+func (a *Application) GetNodes(query url.Values) ([]*Node, error) {
+	req := a.newRequest("GET", fmt.Sprintf("/nodes?%s", query.Encode()), nil)
 	res, err := a.Http.Do(req)
 	if err != nil {
 		return nil, err
