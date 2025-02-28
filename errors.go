@@ -1,6 +1,9 @@
 package crocgodyl
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Error struct {
 	Code   string      `json:"code"`
@@ -18,5 +21,11 @@ type ApiError struct {
 }
 
 func (e *ApiError) Error() string {
-	return fmt.Sprintf("%d unexpected error(s)", len(e.Errors))
+	sb := &strings.Builder{}
+
+	for _, err := range e.Errors {
+		sb.WriteString(fmt.Sprintf("\t - %s\n", err.Error()))
+	}
+
+	return fmt.Sprintf("API returned %d errors:\n%s", len(e.Errors), sb.String())
 }
