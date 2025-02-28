@@ -22,10 +22,6 @@ type Egg struct {
 			UserInteraction []string `json:"userInteraction"`
 		} `json:"startup"`
 		Stop string `json:"stop"`
-		Logs struct {
-			Custom   bool   `json:"custom"`
-			Location string `json:"location"`
-		} `json:"logs"`
 	} `json:"config"`
 	Startup string `json:"startup"`
 	Script  struct {
