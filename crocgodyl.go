@@ -80,23 +80,22 @@ func (a *Client) newRequest(method, path string, body io.Reader) *http.Request {
 
 func validate(res *http.Response) ([]byte, error) {
 	switch res.StatusCode {
-	case http.StatusOK:
-		fallthrough
+	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
+		buf, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
 
-	case http.StatusCreated:
-		fallthrough
-
-	case http.StatusAccepted:
-		defer res.Body.Close()
-		buf, _ := io.ReadAll(res.Body)
 		return buf, nil
 
 	case http.StatusNoContent:
 		return nil, nil
 
 	default:
-		defer res.Body.Close()
-		buf, _ := io.ReadAll(res.Body)
+		buf, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
 
 		var errs *ApiError
 		if err := json.Unmarshal(buf, &errs); err != nil {
