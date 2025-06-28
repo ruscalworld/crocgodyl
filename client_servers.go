@@ -40,16 +40,17 @@ type ClientServer struct {
 		IP   string `json:"ip"`
 		Port int64  `json:"port"`
 	} `json:"sftp_details"`
-	Description   string        `json:"description"`
-	Limits        Limits        `json:"limits"`
-	Invocation    string        `json:"invocation"`
-	DockerImage   string        `json:"docker_image"`
-	EggFeatures   []string      `json:"egg_features"`
-	FeatureLimits FeatureLimits `json:"feature_limits"`
-	Status        string        `json:"status"`
-	Suspended     bool          `json:"is_suspended"`
-	Installing    bool          `json:"is_installing"`
-	Transferring  bool          `json:"is_transferring"`
+	Description      string        `json:"description"`
+	Limits           Limits        `json:"limits"`
+	Invocation       string        `json:"invocation"`
+	DockerImage      string        `json:"docker_image"`
+	EggFeatures      []string      `json:"egg_features"`
+	FeatureLimits    FeatureLimits `json:"feature_limits"`
+	Status           string        `json:"status"`
+	Suspended        bool          `json:"is_suspended"`
+	Installing       bool          `json:"is_installing"`
+	Transferring     bool          `json:"is_transferring"`
+	UnderMaintenance bool          `json:"is_node_under_maintenance"`
 }
 
 func (c *Client) GetServers() ([]*ClientServer, error) {
