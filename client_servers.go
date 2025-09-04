@@ -680,16 +680,16 @@ func (u *Uploader) Execute() error {
 	return nil
 }
 
-func (c *Client) UploadServerFile(identifier, path string) (*Uploader, error) {
+func (c *Client) GetUploadUrl(identifier string) (string, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/files/upload", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	buf, err := validate(res)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	var model struct {
@@ -698,9 +698,18 @@ func (c *Client) UploadServerFile(identifier, path string) (*Uploader, error) {
 		} `json:"attributes"`
 	}
 	if err = json.Unmarshal(buf, &model); err != nil {
+		return "", err
+	}
+
+	return model.Attributes.URL, nil
+}
+
+func (c *Client) UploadServerFile(identifier string) (*Uploader, error) {
+	uploadUrl, err := c.GetUploadUrl(identifier)
+	if err != nil {
 		return nil, err
 	}
 
-	up := &Uploader{client: c, url: model.Attributes.URL}
+	up := &Uploader{client: c, url: uploadUrl}
 	return up, nil
 }
