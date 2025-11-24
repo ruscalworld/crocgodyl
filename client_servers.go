@@ -714,7 +714,7 @@ func (c *Client) UploadServerFile(identifier string) (*Uploader, error) {
 	return up, nil
 }
 
-type AllocationAtributes struct {
+type AllocationAttributes struct {
 	ID      int64    `json:"id"`
 	IP      string   `json:"ip"`
 	IPAlias []string `json:"ip_alias"`
@@ -723,7 +723,7 @@ type AllocationAtributes struct {
 	Default bool     `json:"is_default"`
 }
 
-func (c *Client) GetAllocations(identifier string) ([]*AllocationAtributes, error) {
+func (c *Client) GetAllocations(identifier string) ([]*AllocationAttributes, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -740,7 +740,7 @@ func (c *Client) GetAllocations(identifier string) ([]*AllocationAtributes, erro
 			Relationships struct {
 				Allocations struct {
 					Data []struct {
-						Allocations *AllocationAtributes `json:"attributes"`
+						Allocations *AllocationAttributes `json:"attributes"`
 					} `json:"data"`
 				} `json:"allocations"`
 			} `json:"relationships"`
@@ -751,8 +751,8 @@ func (c *Client) GetAllocations(identifier string) ([]*AllocationAtributes, erro
 		return nil, err
 	}
 
-	allocations := make([]*AllocationAtributes, 0, len(model.Data))
-	for _, s := range model.Data {
+	allocations := make([]*AllocationAttributes, 0, len(model.Attributes.Relationships.Allocations.Data))
+	for _, s := range model.Attributes.Relationships.Allocations.Data {
 		allocations = append(allocations, s.Allocations)
 	}
 
