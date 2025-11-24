@@ -723,8 +723,8 @@ type AllocationAtributes struct {
 	Default bool     `json:"is_default"`
 }
 
-func (c *Client) GetAllocations() ([]*AllocationAtributes, error) {
-	req := c.newRequest("GET", fmt.Sprintf("/api/client"), nil)
+func (c *Client) GetAllocations(identifier string) ([]*AllocationAtributes, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
