@@ -713,3 +713,42 @@ func (c *Client) UploadServerFile(identifier string) (*Uploader, error) {
 	up := &Uploader{client: c, url: uploadUrl}
 	return up, nil
 }
+
+type AllocationAtributes struct {
+	ID      int64    `json:"id"`
+	IP      string   `json:"ip"`
+	IPAlias []string `json:"ip_alias"`
+	Port    int      `json:"port"`
+	Notes   string   `json:"notes"`
+	Default bool     `json:"is_default"`
+}
+
+func (c *Client) GetAllocations() ([]*AllocationAtributes, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/api/client"), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Data []struct {
+			Allocations *AllocationAtributes `json:"attributes"`
+		} `json:"data"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	allocations := make([]*AllocationAtributes, 0, len(model.Data))
+	for _, s := range model.Data {
+		allocations = append(allocations, s.Allocations)
+	}
+
+	return allocations, nil
+}
