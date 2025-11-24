@@ -736,9 +736,15 @@ func (c *Client) GetAllocations(identifier string) ([]*AllocationAtributes, erro
 	}
 
 	var model struct {
-		Data []struct {
-			Allocations *AllocationAtributes `json:"attributes"`
-		} `json:"data"`
+		Attributes struct {
+			Relationships struct {
+				Allocations struct {
+					Data []struct {
+						Allocations *AllocationAtributes `json:"attributes"`
+					} `json:"data"`
+				} `json:"allocations"`
+			} `json:"relationships"`
+		} `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
