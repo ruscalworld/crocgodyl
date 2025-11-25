@@ -814,23 +814,8 @@ type allocationData struct {
 	Attributes AllocationAttributes `json:"attributes"`
 }
 
-func (c *Client) UpdateAllocation(identifier string, allocationID int64, ip string, ipAlias []string, port int64, notes string, isDefault bool) (*AllocationAttributes, error) {
-	allocation := &allocationData{
-		Object: "allocation",
-		Attributes: AllocationAttributes{
-			ID:      allocationID,
-			IP:      ip,
-			IPAlias: ipAlias,
-			Port:    port,
-			Notes:   notes,
-			Default: isDefault,
-		},
-	}
-	data, _ := json.Marshal(allocation)
-	body := bytes.Buffer{}
-	body.Write(data)
-
-	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations/%d/primary", identifier, allocationID), &body)
+func (c *Client) MakePrimary(identifier string, allocationID int64) (*AllocationAttributes, error) {
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations/%d/primary", identifier, allocationID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
