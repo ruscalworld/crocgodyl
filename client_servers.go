@@ -718,7 +718,7 @@ type AllocationAttributes struct {
 	ID      int64    `json:"id"`
 	IP      string   `json:"ip"`
 	IPAlias []string `json:"ip_alias"`
-	Port    int      `json:"port"`
+	Port    int64    `json:"port"`
 	Notes   string   `json:"notes"`
 	Default bool     `json:"is_default"`
 }
@@ -757,4 +757,108 @@ func (c *Client) GetAllocations(identifier string) ([]*AllocationAttributes, err
 	}
 
 	return allocations, nil
+}
+
+func (c *Client) CreateAllocation(identifier string) (*AllocationAttributes, error) {
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations", identifier), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Allocations *AllocationAttributes `json:"attributes"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Allocations, nil
+}
+
+func (c *Client) ChangeNotes(identifier string, allocationID int64, notes string) (*AllocationAttributes, error) {
+	data, _ := json.Marshal(map[string]string{"notes": notes})
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations/%d", identifier, allocationID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Allocations *AllocationAttributes `json:"attributes"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Allocations, nil
+}
+
+type allocationData struct {
+	Object     string               `json:"object"`
+	Attributes AllocationAttributes `json:"attributes"`
+}
+
+func (c *Client) UpdateAllocation(identifier string, allocationID int64, ip string, ipAlias []string, port int64, notes string, isDefault bool) (*AllocationAttributes, error) {
+	allocation := &allocationData{
+		Object: "allocation",
+		Attributes: AllocationAttributes{
+			ID:      allocationID,
+			IP:      ip,
+			IPAlias: ipAlias,
+			Port:    port,
+			Notes:   notes,
+			Default: isDefault,
+		},
+	}
+	data, _ := json.Marshal(allocation)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations/%d/primary", identifier, allocationID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Allocations *AllocationAttributes `json:"attributes"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Allocations, nil
+}
+
+func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
+	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/network/allocations/%d", identifier, allocationID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
 }
