@@ -809,11 +809,6 @@ func (c *Client) ChangeNotes(identifier string, allocationID int64, notes string
 	return model.Allocations, nil
 }
 
-type allocationData struct {
-	Object     string               `json:"object"`
-	Attributes AllocationAttributes `json:"attributes"`
-}
-
 func (c *Client) MakePrimary(identifier string, allocationID int64) (*AllocationAttributes, error) {
 	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/network/allocations/%d/primary", identifier, allocationID), nil)
 	res, err := c.Http.Do(req)
@@ -839,6 +834,119 @@ func (c *Client) MakePrimary(identifier string, allocationID int64) (*Allocation
 
 func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/network/allocations/%d", identifier, allocationID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+type Meta struct {
+	StartupCommand struct {
+		DockerImages struct {
+			Java21 string `json:"Java_21"`
+			Java17 string `json:"Java_17"`
+			Java16 string `json:"Java_16"`
+			Java11 string `json:"Java_11"`
+			Java8  string `json:"Java_8"`
+		} `json:"docker_images"`
+	} `json:"startup_command"`
+	RawStartupCommand string `json:"raw_startup_command"`
+}
+
+func (c *Client) GetStartupInfo(identifier string) (*Meta, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/startup", identifier), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Meta Meta `json:"meta"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Meta, nil
+}
+
+func (c *Client) UpdateDockerImage(identifier string, docker_image string) error {
+	data, _ := json.Marshal(map[string]string{"docker_image": docker_image})
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("PUT", fmt.Sprintf("/servers/%s/settings/docker-image", identifier), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+type EggVariables struct {
+	Object     string `json:"object"`
+	Attributes struct {
+		Name         string `json:"name"`
+		Description  string `json:"description"`
+		EnvVariable  string `json:"env_variable"`
+		DefaultValue string `json:"default_value"`
+		ServerValue  string `json:"server_value"`
+		IsEditable   bool   `json:"is_editable"`
+		Rules        string `json:"rules"`
+	} `json:"attributes"`
+}
+
+func (c *Client) GetVariables(identifier string) (*[]EggVariables, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/startup", identifier), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Data []EggVariables `json:"data"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Data, nil
+}
+
+func (c *Client) PutVariable(identifier, key, value string) error {
+	data, _ := json.Marshal(map[string]string{"key": key, "value": value})
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("PUT", fmt.Sprintf("/servers/%s/startup/variable", identifier), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) Reinstall(identifier string) error {
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/settings/reinstall", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return err
