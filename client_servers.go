@@ -845,13 +845,7 @@ func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 
 type Meta struct {
 	StartupCommand struct {
-		DockerImages struct {
-			Java21 string `json:"Java_21"`
-			Java17 string `json:"Java_17"`
-			Java16 string `json:"Java_16"`
-			Java11 string `json:"Java_11"`
-			Java8  string `json:"Java_8"`
-		} `json:"docker_images"`
+		DockerImages map[string]string `json:"docker_images"`
 	} `json:"startup_command"`
 	RawStartupCommand string `json:"raw_startup_command"`
 }
