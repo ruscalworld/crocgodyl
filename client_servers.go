@@ -715,12 +715,12 @@ func (c *Client) UploadServerFile(identifier string) (*Uploader, error) {
 }
 
 type AllocationAttributes struct {
-	ID      int64    `json:"id"`
-	IP      string   `json:"ip"`
-	IPAlias []string `json:"ip_alias"`
-	Port    int64    `json:"port"`
-	Notes   string   `json:"notes"`
-	Default bool     `json:"is_default"`
+	ID      int64  `json:"id"`
+	IP      string `json:"ip"`
+	IPAlias string `json:"ip_alias"`
+	Port    int64  `json:"port"`
+	Notes   string `json:"notes"`
+	Default bool   `json:"is_default"`
 }
 
 func (c *Client) GetAllocations(identifier string) ([]*AllocationAttributes, error) {
@@ -873,8 +873,8 @@ func (c *Client) GetStartupInfo(identifier string) (*Meta, error) {
 	return &model.Meta, nil
 }
 
-func (c *Client) UpdateDockerImage(identifier string, docker_image string) error {
-	data, _ := json.Marshal(map[string]string{"docker_image": docker_image})
+func (c *Client) UpdateDockerImage(identifier string, dockerImage string) error {
+	data, _ := json.Marshal(map[string]string{"docker_image": dockerImage})
 	body := bytes.Buffer{}
 	body.Write(data)
 
