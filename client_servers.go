@@ -901,7 +901,7 @@ type EggVariables struct {
 	} `json:"attributes"`
 }
 
-func (c *Client) GetVariables(identifier string) (*[]EggVariables, error) {
+func (c *Client) GetVariables(identifier string) ([]*EggVariables, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/startup", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -914,14 +914,14 @@ func (c *Client) GetVariables(identifier string) (*[]EggVariables, error) {
 	}
 
 	var model struct {
-		Data []EggVariables `json:"data"`
+		Data []*EggVariables `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Data, nil
+	return model.Data, nil
 }
 
 func (c *Client) PutVariable(identifier, key, value string) error {
