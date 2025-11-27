@@ -310,8 +310,8 @@ type File struct {
 	ModifiedAt *time.Time `json:"modified_at,omitempty"`
 }
 
-func (c *Client) GetServerFiles(identififer, root string) ([]*File, error) {
-	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/files/list?directory=%s", identififer, url.PathEscape(root)), nil)
+func (c *Client) GetServerFiles(identifier, root string) ([]*File, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/files/list?directory=%s", identifier, url.PathEscape(root)), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
@@ -844,10 +844,9 @@ func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 }
 
 type Meta struct {
-	StartupCommand struct {
-		DockerImages map[string]string `json:"docker_images"`
-	} `json:"startup_command"`
-	RawStartupCommand string `json:"raw_startup_command"`
+	StartupCommand    string            `json:"startup_command"`
+	DockerImages      map[string]string `json:"docker_images"`
+	RawStartupCommand string            `json:"raw_startup_command"`
 }
 
 func (c *Client) GetStartupInfo(identifier string) (*Meta, error) {
