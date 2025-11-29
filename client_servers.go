@@ -948,3 +948,194 @@ func (c *Client) Reinstall(identifier string) error {
 	_, err = validate(res)
 	return err
 }
+
+type SchedulesInfo struct {
+	Object     string `json:"object"`
+	Attributes struct {
+		Id   int    `json:"id"`
+		Name string `json:"name"`
+		Cron struct {
+			DayOfWeek  string `json:"day_of_week"`
+			DayOfMonth string `json:"day_of_month"`
+			Hour       string `json:"hour"`
+			Minute     string `json:"minute"`
+			Month      string `json:"month"`
+		} `json:"cron"`
+		IsActive       bool        `json:"is_active"`
+		IsProcessing   bool        `json:"is_processing"`
+		OnlyWhenOnline bool        `json:"only_when_online"`
+		LastRunAt      interface{} `json:"last_run_at"`
+		NextRunAt      time.Time   `json:"next_run_at"`
+		CreatedAt      time.Time   `json:"created_at"`
+		UpdatedAt      time.Time   `json:"updated_at"`
+		Relationships  struct {
+			Tasks struct {
+				Object string        `json:"object"`
+				Data   []interface{} `json:"data"`
+			} `json:"tasks"`
+		} `json:"relationships"`
+	} `json:"attributes"`
+}
+
+func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Schedules SchedulesInfo
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Schedules, nil
+}
+
+type Schedule struct {
+	DayOfMonth     string `json:"day_of_month"`
+	DayOfWeek      string `json:"day_of_week"`
+	Hour           string `json:"hour"`
+	IsActive       bool   `json:"is_active"`
+	Minute         string `json:"minute"`
+	Month          string `json:"month"`
+	Name           string `json:"name"`
+	OnlyWhenOnline bool   `json:"only_when_online"`
+}
+
+func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error {
+	data, _ := json.Marshal(newSchedule)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules", identifier), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) UpdateSchedule(identifier string, updatedSchedule Schedule, scheduleID int64) error {
+	data, _ := json.Marshal(updatedSchedule)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) ExecuteSchedule(identifier string, scheduleID int64) error {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d/execute", identifier, scheduleID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) DeleteSchedule(identifier string, scheduleID int64) error {
+	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+type TasksInfo struct {
+	Action     string `json:"action"`
+	Payload    string `json:"payload"`
+	TimeOffset string `json:"time_offset"`
+}
+
+func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*TasksInfo, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d/tasks", identifier, scheduleID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Schedules []*TasksInfo `json:"tasks"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Schedules, nil
+}
+
+type Task struct {
+	Action            string `json:"action"`
+	ContinueOnFailure bool   `json:"continue_on_failure"`
+	Payload           string `json:"payload"`
+	TimeOffset        string `json:"time_offset"`
+}
+
+func (c *Client) CreateScheduleTasks(identifier string, scheduleID int64, task Task) error {
+	data, _ := json.Marshal(task)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules/%d/tasks", identifier, scheduleID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) UpdateScheduleTasks(identifier string, scheduleID int64, taskID int64, task Task) error {
+	data, _ := json.Marshal(task)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules/%d/tasks/%d", identifier, scheduleID, taskID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) DeleteScheduleTasks(identifier string, scheduleID int64, taskID int64) error {
+	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/schedules/%d/tasks/%d", identifier, scheduleID, taskID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
