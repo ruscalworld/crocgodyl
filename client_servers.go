@@ -1011,6 +1011,29 @@ type Schedule struct {
 	OnlyWhenOnline bool   `json:"only_when_online"`
 }
 
+func (c *Client) GetSchedule(identifier string, scheduleID int64) (*Schedule, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Schedule Schedule
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Schedule, nil
+}
+
 func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error {
 	data, _ := json.Marshal(newSchedule)
 	body := bytes.Buffer{}
