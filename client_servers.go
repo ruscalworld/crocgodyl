@@ -978,7 +978,7 @@ type Data struct {
 	Attributes Attributes `json:"attributes"`
 }
 
-func (c *Client) GetSchedules(identifier string) (*[]Data, error) {
+func (c *Client) GetSchedules(identifier string) ([]*Data, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -991,14 +991,14 @@ func (c *Client) GetSchedules(identifier string) (*[]Data, error) {
 	}
 
 	var model struct {
-		Data []Data `json:"data"`
+		Data []*Data `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Data, nil
+	return model.Data, nil
 }
 
 type Schedule struct {
