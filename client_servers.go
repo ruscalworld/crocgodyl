@@ -970,7 +970,15 @@ type Cron struct {
 	Month      string `json:"month"`
 }
 
-func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
+type Attributes struct {
+	Schedule SchedulesInfo
+}
+
+type Data struct {
+	Attributes Attributes `json:"attributes"`
+}
+
+func (c *Client) GetSchedules(identifier string) (*[]Data, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -983,18 +991,14 @@ func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
 	}
 
 	var model struct {
-		Data struct {
-			Attributes struct {
-				Schedules SchedulesInfo
-			} `json:"attributes"`
-		} `json:"data"`
+		Data []Data `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Attributes.Schedules, nil
+	return &model.Data, nil
 }
 
 type Schedule struct {
