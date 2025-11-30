@@ -983,9 +983,11 @@ func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
 	}
 
 	var model struct {
-		Attributes struct {
-			Schedules SchedulesInfo
-		} `json:"attributes"`
+		Data struct {
+			Attributes struct {
+				Schedules SchedulesInfo
+			} `json:"attributes"`
+		} `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
