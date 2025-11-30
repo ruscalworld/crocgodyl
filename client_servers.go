@@ -950,18 +950,16 @@ func (c *Client) Reinstall(identifier string) error {
 }
 
 type SchedulesInfo struct {
-	Attributes struct {
-		Id             int         `json:"id"`
-		Name           string      `json:"name"`
-		Cron           Cron        `json:"cron"`
-		IsActive       bool        `json:"is_active"`
-		IsProcessing   bool        `json:"is_processing"`
-		OnlyWhenOnline bool        `json:"only_when_online"`
-		LastRunAt      interface{} `json:"last_run_at"`
-		NextRunAt      time.Time   `json:"next_run_at"`
-		CreatedAt      time.Time   `json:"created_at"`
-		UpdatedAt      time.Time   `json:"updated_at"`
-	} `json:"attributes"`
+	Id             int         `json:"id"`
+	Name           string      `json:"name"`
+	Cron           Cron        `json:"cron"`
+	IsActive       bool        `json:"is_active"`
+	IsProcessing   bool        `json:"is_processing"`
+	OnlyWhenOnline bool        `json:"only_when_online"`
+	LastRunAt      interface{} `json:"last_run_at"`
+	NextRunAt      time.Time   `json:"next_run_at"`
+	CreatedAt      time.Time   `json:"created_at"`
+	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
 type Cron struct {
@@ -985,14 +983,16 @@ func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
 	}
 
 	var model struct {
-		Schedules SchedulesInfo
+		Attributes struct {
+			Schedules SchedulesInfo
+		} `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Schedules, nil
+	return &model.Attributes.Schedules, nil
 }
 
 type Schedule struct {
