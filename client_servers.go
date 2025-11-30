@@ -950,17 +950,10 @@ func (c *Client) Reinstall(identifier string) error {
 }
 
 type SchedulesInfo struct {
-	Object     string `json:"object"`
 	Attributes struct {
-		Id   int    `json:"id"`
-		Name string `json:"name"`
-		Cron struct {
-			DayOfWeek  string `json:"day_of_week"`
-			DayOfMonth string `json:"day_of_month"`
-			Hour       string `json:"hour"`
-			Minute     string `json:"minute"`
-			Month      string `json:"month"`
-		} `json:"cron"`
+		Id             int         `json:"id"`
+		Name           string      `json:"name"`
+		Cron           Cron        `json:"cron"`
 		IsActive       bool        `json:"is_active"`
 		IsProcessing   bool        `json:"is_processing"`
 		OnlyWhenOnline bool        `json:"only_when_online"`
@@ -968,13 +961,15 @@ type SchedulesInfo struct {
 		NextRunAt      time.Time   `json:"next_run_at"`
 		CreatedAt      time.Time   `json:"created_at"`
 		UpdatedAt      time.Time   `json:"updated_at"`
-		Relationships  struct {
-			Tasks struct {
-				Object string        `json:"object"`
-				Data   []interface{} `json:"data"`
-			} `json:"tasks"`
-		} `json:"relationships"`
 	} `json:"attributes"`
+}
+
+type Cron struct {
+	DayOfWeek  string `json:"day_of_week"`
+	DayOfMonth string `json:"day_of_month"`
+	Hour       string `json:"hour"`
+	Minute     string `json:"minute"`
+	Month      string `json:"month"`
 }
 
 func (c *Client) GetSchedules(identifier string) (*SchedulesInfo, error) {
