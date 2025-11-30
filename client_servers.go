@@ -1162,3 +1162,146 @@ func (c *Client) DeleteScheduleTasks(identifier string, scheduleID int64, taskID
 	_, err = validate(res)
 	return err
 }
+
+type BackupInfo struct {
+	Uuid         string    `json:"uuid"`
+	Name         string    `json:"name"`
+	IgnoredFiles []string  `json:"ignored_files"`
+	Sha256Hash   string    `json:"sha256_hash"`
+	Bytes        int       `json:"bytes"`
+	CreatedAt    time.Time `json:"created_at"`
+	CompletedAt  time.Time `json:"completed_at"`
+	IsSuccessful bool      `json:"is_successful"`
+	IsLocked     bool      `json:"is_locked"`
+}
+
+func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/backups", identifier), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Data []*BackupInfo `json:"data"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Data, nil
+}
+
+func (c *Client) CreateBackups(identifier string, name string, ignored string, isLocked bool) error {
+	backupData := map[string]interface{}{
+		"name":      name,
+		"ignored":   ignored,
+		"is_locked": isLocked,
+	}
+	data, _ := json.Marshal(backupData)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/backups", identifier), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) GetBackup(identifier string, backupID string) (*BackupInfo, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/backups/%s", identifier, backupID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Data *BackupInfo `json:"data"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return model.Data, nil
+}
+
+type DownloadBackupURL struct {
+	URL string `json:"url"`
+}
+
+func (c *Client) DownloadBackup(identifier string, backupID string) (*DownloadBackupURL, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/backups/%s/download", identifier, backupID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Attributes DownloadBackupURL `json:"attributes"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Attributes, nil
+}
+
+func (c *Client) LockBackup(identifier string, backupID string) error {
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/backups/%s/lock	", identifier, backupID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) RestoreBackup(identifier string, backupID string, truncate bool) error {
+	backupData := map[string]bool{"truncate": truncate}
+	data, _ := json.Marshal(backupData)
+	body := bytes.Buffer{}
+	body.Write(data)
+
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/backups/%s/restore", identifier, backupID), &body)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
+
+func (c *Client) DeleteBackup(identifier string, backupID string) error {
+	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/backups/%s", identifier, backupID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
