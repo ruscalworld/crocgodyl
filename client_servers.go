@@ -1113,7 +1113,7 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 		return nil, err
 	}
 
-	return model.Attributes.Relationships.Tasks, nil
+	return model.Attributes.Relationships.Data.Tasks, nil
 }
 
 type Task struct {
