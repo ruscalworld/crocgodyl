@@ -1066,7 +1066,7 @@ func (c *Client) UpdateSchedule(identifier string, updatedSchedule Schedule, sch
 }
 
 func (c *Client) ExecuteSchedule(identifier string, scheduleID int64) error {
-	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d/execute", identifier, scheduleID), nil)
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules/%d/execute", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return err
