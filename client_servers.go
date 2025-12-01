@@ -1034,7 +1034,7 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*Schedule, er
 		return nil, err
 	}
 
-	return &model.Schedule, nil
+	return &model.Attributes.Schedule, nil
 }
 
 func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error {
