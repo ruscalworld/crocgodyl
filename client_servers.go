@@ -1186,7 +1186,9 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 
 	var model struct {
 		Data struct {
-			Attributes []*BackupInfo `json:"attributes"`
+			Attributes struct {
+				Backups []*BackupInfo
+			} `json:"attributes"`
 		} `json:"data"`
 	}
 
@@ -1194,7 +1196,7 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 		return nil, err
 	}
 
-	return model.Data.Attributes, nil
+	return model.Data.Attributes.Backups, nil
 }
 
 func (c *Client) CreateBackups(identifier string, name string, ignored string, isLocked bool) error {
