@@ -1235,16 +1235,14 @@ func (c *Client) GetBackup(identifier string, backupID string) (*BackupInfo, err
 	}
 
 	var model struct {
-		Data struct {
-			Attributes BackupInfo `json:"attributes"`
-		} `json:"data"`
+		Attributes BackupInfo `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Data.Attributes, nil
+	return &model.Attributes, nil
 }
 
 type DownloadBackupURL struct {
