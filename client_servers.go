@@ -1088,7 +1088,7 @@ type TasksInfo struct {
 }
 
 func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*TasksInfo, error) {
-	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d/tasks", identifier, scheduleID), nil)
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
@@ -1100,14 +1100,18 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 	}
 
 	var model struct {
-		Schedules []*TasksInfo `json:"tasks"`
+		Attributes struct {
+			Relationships struct {
+				Tasks []*TasksInfo `json:"tasks"`
+			} `json:"relationships"`
+		} `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return model.Schedules, nil
+	return model.Attributes.Relationships.Tasks, nil
 }
 
 type Task struct {
