@@ -1115,8 +1115,8 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 		Attributes struct {
 			Relationships struct {
 				Tasks struct {
-					Data struct {
-						Attributes []*TasksData `json:"attributes"`
+					Data []struct {
+						Attributes *TasksData `json:"attributes"`
 					} `json:"data"`
 				} `json:"tasks"`
 			} `json:"relationships"`
@@ -1127,7 +1127,12 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 		return nil, err
 	}
 
-	return model.Attributes.Relationships.Tasks.Data.Attributes, nil
+	var tasks []*TasksData
+	for _, s := range model.Attributes.Relationships.Tasks.Data {
+		tasks = append(tasks, s.Attributes)
+	}
+
+	return tasks, nil
 }
 
 type Task struct {
