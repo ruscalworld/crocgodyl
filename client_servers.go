@@ -1025,7 +1025,9 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*Schedule, er
 	}
 
 	var model struct {
-		Schedule Schedule
+		Attributes struct {
+			Schedule Schedule
+		} `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
