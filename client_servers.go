@@ -1345,14 +1345,3 @@ func (c *Client) GetDatabase(identifier string) ([]*DataBaseAttributes, error) {
 	}
 	return model.Attributes, nil
 }
-
-func (c *Client) RotatePasswordDatabase(identifier string, databaseID string) error {
-	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/databases/%s/rotate-password	", identifier, databaseID), nil)
-	res, err := c.Http.Do(req)
-	if err != nil {
-		return err
-	}
-
-	_, err = validate(res)
-	return err
-}
