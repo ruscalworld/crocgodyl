@@ -995,7 +995,7 @@ func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
 	return model.Data, nil
 }
 
-func (c *Client) GetSchedule(identifier string, scheduleID int64) (*SchedulesData, error) {
+func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ScheduleAttributes, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
