@@ -1323,26 +1323,3 @@ type DataBaseAttributes struct {
 	ConnectionsFrom string `json:"connections_from"`
 	MaxConnections  int    `json:"max_connections"`
 }
-
-func (c *Client) GetDatabase(identifier string) ([]*DataBaseAttributes, error) {
-	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/database", identifier), nil)
-
-	res, err := c.Http.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	buf, err := validate(res)
-	if err != nil {
-		return nil, err
-	}
-
-	var model struct {
-		Attributes []*DataBaseAttributes `json:"attributes"`
-	}
-
-	if err = json.Unmarshal(buf, &model); err != nil {
-		return nil, err
-	}
-	return model.Attributes, nil
-}
