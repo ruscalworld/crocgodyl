@@ -949,18 +949,16 @@ func (c *Client) Reinstall(identifier string) error {
 	return err
 }
 
-type Cron struct {
-	DayOfWeek  string `json:"day_of_week"`
-	DayOfMonth string `json:"day_of_month"`
-	Hour       string `json:"hour"`
-	Minute     string `json:"minute"`
-	Month      string `json:"month"`
-}
-
 type ScheduleAttributes struct {
-	ID             int         `json:"id"`
-	Name           string      `json:"name"`
-	Cron           Cron        `json:"cron"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Cron struct {
+		DayOfWeek  string `json:"day_of_week"`
+		DayOfMonth string `json:"day_of_month"`
+		Hour       string `json:"hour"`
+		Minute     string `json:"minute"`
+		Month      string `json:"month"`
+	} `json:"cron"`
 	IsActive       bool        `json:"is_active"`
 	IsProcessing   bool        `json:"is_processing"`
 	OnlyWhenOnline bool        `json:"only_when_online"`
@@ -1020,7 +1018,7 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*SchedulesDat
 	return &model.Attributes, nil
 }
 
-type Schedule struct {
+type UpdateScheduleParams struct {
 	DayOfMonth     string `json:"day_of_month"`
 	DayOfWeek      string `json:"day_of_week"`
 	Hour           string `json:"hour"`
