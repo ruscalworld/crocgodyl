@@ -1308,3 +1308,51 @@ func (c *Client) DeleteBackup(identifier string, backupID string) error {
 	_, err = validate(res)
 	return err
 }
+
+type DBHost struct {
+	Address string `json:"address"`
+	Port    int    `json:"port"`
+}
+
+type DataBaseAttributes struct {
+	Id              string `json:"id"`
+	Host            DBHost `json:"host"`
+	Name            string `json:"name"`
+	Username        string `json:"username"`
+	ConnectionsFrom string `json:"connections_from"`
+	MaxConnections  int    `json:"max_connections"`
+}
+
+func (c *Client) GetDatabase(identifier string) ([]*DataBaseAttributes, error) {
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/database", identifier), nil)
+
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model struct {
+		Attributes []*DataBaseAttributes `json:"attributes"`
+	}
+
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+	return model.Attributes, nil
+}
+
+func (c *Client) RotatePasswordDatabase(identifier string, databaseID string) error {
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/databases/%s/rotate-password	", identifier, databaseID), nil)
+	res, err := c.Http.Do(req)
+	if err != nil {
+		return err
+	}
+
+	_, err = validate(res)
+	return err
+}
