@@ -1029,7 +1029,7 @@ type UpdateScheduleParams struct {
 	OnlyWhenOnline bool   `json:"only_when_online"`
 }
 
-func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error {
+func (c *Client) CreateSchedules(identifier string, newSchedule UpdateScheduleParams) error {
 	data, _ := json.Marshal(newSchedule)
 	body := bytes.Buffer{}
 	body.Write(data)
@@ -1044,7 +1044,7 @@ func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error 
 	return err
 }
 
-func (c *Client) UpdateSchedule(identifier string, updatedSchedule Schedule, scheduleID int64) error {
+func (c *Client) UpdateSchedule(identifier string, updatedSchedule UpdateScheduleParams, scheduleID int64) error {
 	data, _ := json.Marshal(updatedSchedule)
 	body := bytes.Buffer{}
 	body.Write(data)
