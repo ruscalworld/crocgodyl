@@ -949,8 +949,16 @@ func (c *Client) Reinstall(identifier string) error {
 	return err
 }
 
-type SchedulesInfo struct {
-	Id             int         `json:"id"`
+type Cron struct {
+	DayOfWeek  string `json:"day_of_week"`
+	DayOfMonth string `json:"day_of_month"`
+	Hour       string `json:"hour"`
+	Minute     string `json:"minute"`
+	Month      string `json:"month"`
+}
+
+type ScheduleAttributes struct {
+	ID             int         `json:"id"`
 	Name           string      `json:"name"`
 	Cron           Cron        `json:"cron"`
 	IsActive       bool        `json:"is_active"`
@@ -962,23 +970,11 @@ type SchedulesInfo struct {
 	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
-type Cron struct {
-	DayOfWeek  string `json:"day_of_week"`
-	DayOfMonth string `json:"day_of_month"`
-	Hour       string `json:"hour"`
-	Minute     string `json:"minute"`
-	Month      string `json:"month"`
+type SchedulesData struct {
+	Attributes ScheduleAttributes `json:"attributes"`
 }
 
-type Attributes struct {
-	Schedule SchedulesInfo
-}
-
-type Data struct {
-	Attributes Attributes `json:"attributes"`
-}
-
-func (c *Client) GetSchedules(identifier string) ([]*Data, error) {
+func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -991,7 +987,7 @@ func (c *Client) GetSchedules(identifier string) ([]*Data, error) {
 	}
 
 	var model struct {
-		Data []*Data `json:"data"`
+		Data []*SchedulesData `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
@@ -1001,18 +997,7 @@ func (c *Client) GetSchedules(identifier string) ([]*Data, error) {
 	return model.Data, nil
 }
 
-type Schedule struct {
-	DayOfMonth     string `json:"day_of_month"`
-	DayOfWeek      string `json:"day_of_week"`
-	Hour           string `json:"hour"`
-	IsActive       bool   `json:"is_active"`
-	Minute         string `json:"minute"`
-	Month          string `json:"month"`
-	Name           string `json:"name"`
-	OnlyWhenOnline bool   `json:"only_when_online"`
-}
-
-func (c *Client) GetSchedule(identifier string, scheduleID int64) (*Schedule, error) {
+func (c *Client) GetSchedule(identifier string, scheduleID int64) (*SchedulesData, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1025,16 +1010,25 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*Schedule, er
 	}
 
 	var model struct {
-		Attributes struct {
-			Schedule Schedule
-		} `json:"attributes"`
+		Attributes SchedulesData `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return &model.Attributes.Schedule, nil
+	return &model.Attributes, nil
+}
+
+type Schedule struct {
+	DayOfMonth     string `json:"day_of_month"`
+	DayOfWeek      string `json:"day_of_week"`
+	Hour           string `json:"hour"`
+	IsActive       bool   `json:"is_active"`
+	Minute         string `json:"minute"`
+	Month          string `json:"month"`
+	Name           string `json:"name"`
+	OnlyWhenOnline bool   `json:"only_when_online"`
 }
 
 func (c *Client) CreateSchedules(identifier string, newSchedule Schedule) error {
@@ -1191,14 +1185,16 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 	}
 
 	var model struct {
-		Data []*BackupInfo `json:"data"`
+		Data struct {
+			Attributes []*BackupInfo `json:"attributes"`
+		} `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return model.Data, nil
+	return model.Data.Attributes, nil
 }
 
 func (c *Client) CreateBackups(identifier string, name string, ignored string, isLocked bool) error {
