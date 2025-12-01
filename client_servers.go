@@ -1102,7 +1102,9 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 	var model struct {
 		Attributes struct {
 			Relationships struct {
-				Tasks []*TasksInfo `json:"tasks"`
+				Data struct {
+					Tasks []*TasksInfo `json:"tasks"`
+				} `json:"data"`
 			} `json:"relationships"`
 		} `json:"attributes"`
 	}
