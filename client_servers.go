@@ -1087,7 +1087,19 @@ type TasksInfo struct {
 	TimeOffset string `json:"time_offset"`
 }
 
-func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*TasksInfo, error) {
+type TasksData struct {
+	Id                int       `json:"id"`
+	SequenceId        int       `json:"sequence_id"`
+	Action            string    `json:"action"`
+	Payload           string    `json:"payload"`
+	TimeOffset        int       `json:"time_offset"`
+	IsQueued          bool      `json:"is_queued"`
+	ContinueOnFailure bool      `json:"continue_on_failure"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*TasksData, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1102,9 +1114,11 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 	var model struct {
 		Attributes struct {
 			Relationships struct {
-				Data struct {
-					Tasks []*TasksInfo `json:"tasks"`
-				} `json:"data"`
+				Tasks struct {
+					Data struct {
+						Attributes []*TasksData `json:"attributes"`
+					} `json:"data"`
+				} `json:"tasks"`
 			} `json:"relationships"`
 		} `json:"attributes"`
 	}
@@ -1113,7 +1127,7 @@ func (c *Client) GetScheduleTasks(identifier string, scheduleID int64) ([]*Tasks
 		return nil, err
 	}
 
-	return model.Attributes.Relationships.Data.Tasks, nil
+	return model.Attributes.Relationships.Tasks.Data.Attributes, nil
 }
 
 type Task struct {
