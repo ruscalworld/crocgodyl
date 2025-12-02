@@ -1229,7 +1229,7 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 	return backups, nil
 }
 
-func (c *Client) CreateBackups(identifier string, name string, ignored string, isLocked bool) error {
+func (c *Client) CreateBackup(identifier string, name string, ignored string, isLocked bool) error {
 	backupData := map[string]interface{}{
 		"name":      name,
 		"ignored":   ignored,
