@@ -1176,7 +1176,7 @@ func (c *Client) UpdateScheduleTasks(identifier string, scheduleID int64, taskID
 	return err
 }
 
-func (c *Client) DeleteScheduleTasks(identifier string, scheduleID int64, taskID int64) error {
+func (c *Client) DeleteScheduleTask(identifier string, scheduleID int64, taskID int64) error {
 	req := c.newRequest("DELETE", fmt.Sprintf("/servers/%s/schedules/%d/tasks/%d", identifier, scheduleID, taskID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
