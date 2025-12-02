@@ -208,10 +208,18 @@ type ClientDatabase struct {
 	} `json:"host"`
 	ConnectionsFrom string `json:"connections_from"`
 	MaxConnections  int    `json:"max_connections"`
+	Relationships   struct {
+		Password struct {
+			Object     string `json:"object"`
+			Attributes struct {
+				Password string `json:"password"`
+			} `json:"attributes"`
+		} `json:"password"`
+	} `json:"relationships"`
 }
 
 func (c *Client) GetServerDatabases(identifier string) ([]*ClientDatabase, error) {
-	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/command", identifier), nil)
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/command?include=password", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
@@ -1336,18 +1344,4 @@ func (c *Client) DeleteBackup(identifier string, backupID string) error {
 
 	_, err = validate(res)
 	return err
-}
-
-type DBHost struct {
-	Address string `json:"address"`
-	Port    int    `json:"port"`
-}
-
-type DataBaseAttributes struct {
-	Id              string `json:"id"`
-	Host            DBHost `json:"host"`
-	Name            string `json:"name"`
-	Username        string `json:"username"`
-	ConnectionsFrom string `json:"connections_from"`
-	MaxConnections  int    `json:"max_connections"`
 }
