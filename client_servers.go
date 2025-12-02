@@ -1090,7 +1090,7 @@ func (c *Client) DeleteSchedule(identifier string, scheduleID int64) error {
 type TasksInfo struct {
 	Action     string `json:"action"`
 	Payload    string `json:"payload"`
-	TimeOffset string `json:"time_offset"`
+	TimeOffset int    `json:"time_offset"`
 }
 
 type TasksData struct {
@@ -1145,7 +1145,7 @@ type Task struct {
 	Action            string `json:"action"`
 	ContinueOnFailure bool   `json:"continue_on_failure"`
 	Payload           string `json:"payload"`
-	TimeOffset        string `json:"time_offset"`
+	TimeOffset        int    `json:"time_offset"`
 }
 
 func (c *Client) CreateScheduleTasks(identifier string, scheduleID int64, task Task) error {
