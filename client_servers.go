@@ -953,30 +953,28 @@ func (c *Client) Reinstall(identifier string) error {
 	return err
 }
 
-type ScheduleAttributes struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Cron struct {
-		DayOfWeek  string `json:"day_of_week"`
-		DayOfMonth string `json:"day_of_month"`
-		Hour       string `json:"hour"`
-		Minute     string `json:"minute"`
-		Month      string `json:"month"`
-	} `json:"cron"`
-	IsActive       bool        `json:"is_active"`
-	IsProcessing   bool        `json:"is_processing"`
-	OnlyWhenOnline bool        `json:"only_when_online"`
-	LastRunAt      interface{} `json:"last_run_at"`
-	NextRunAt      time.Time   `json:"next_run_at"`
-	CreatedAt      time.Time   `json:"created_at"`
-	UpdatedAt      time.Time   `json:"updated_at"`
+type Cron struct {
+	DayOfWeek  string `json:"day_of_week"`
+	DayOfMonth string `json:"day_of_month"`
+	Hour       string `json:"hour"`
+	Minute     string `json:"minute"`
+	Month      string `json:"month"`
 }
 
-type SchedulesData struct {
-	Attributes ScheduleAttributes `json:"attributes"`
+type ClientSchedule struct {
+	ID             int        `json:"id"`
+	Name           string     `json:"name"`
+	Cron           Cron       `json:"cron"`
+	IsActive       bool       `json:"is_active"`
+	IsProcessing   bool       `json:"is_processing"`
+	OnlyWhenOnline bool       `json:"only_when_online"`
+	LastRunAt      *time.Time `json:"last_run_at"`
+	NextRunAt      time.Time  `json:"next_run_at"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
-func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
+func (c *Client) GetSchedules(identifier string) ([]*ClientSchedule, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -988,18 +986,15 @@ func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
 		return nil, err
 	}
 
-	var model struct {
-		Data []*SchedulesData `json:"data"`
-	}
-
+	var model ObjectList[*ClientSchedule]
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return model.Data, nil
+	return model.Objects(), nil
 }
 
-func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ScheduleAttributes, error) {
+func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ClientSchedule, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1011,10 +1006,7 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ScheduleAttr
 		return nil, err
 	}
 
-	var model struct {
-		Attributes ScheduleAttributes `json:"attributes"`
-	}
-
+	var model Object[ClientSchedule]
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
@@ -1033,7 +1025,7 @@ type UpdateScheduleParams struct {
 	OnlyWhenOnline bool   `json:"only_when_online"`
 }
 
-func (c *Client) CreateSchedules(identifier string, newSchedule UpdateScheduleParams) error {
+func (c *Client) CreateSchedule(identifier string, newSchedule UpdateScheduleParams) (*ClientSchedule, error) {
 	data, _ := json.Marshal(newSchedule)
 	body := bytes.Buffer{}
 	body.Write(data)
@@ -1041,11 +1033,20 @@ func (c *Client) CreateSchedules(identifier string, newSchedule UpdateSchedulePa
 	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules", identifier), &body)
 	res, err := c.Http.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = validate(res)
-	return err
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model Object[ClientSchedule]
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Attributes, nil
 }
 
 func (c *Client) UpdateSchedule(identifier string, updatedSchedule UpdateScheduleParams, scheduleID int64) error {
@@ -1088,7 +1089,7 @@ func (c *Client) DeleteSchedule(identifier string, scheduleID int64) error {
 type TasksInfo struct {
 	Action     string `json:"action"`
 	Payload    string `json:"payload"`
-	TimeOffset string `json:"time_offset"`
+	TimeOffset int    `json:"time_offset"`
 }
 
 type TasksData struct {
@@ -1143,7 +1144,7 @@ type Task struct {
 	Action            string `json:"action"`
 	ContinueOnFailure bool   `json:"continue_on_failure"`
 	Payload           string `json:"payload"`
-	TimeOffset        string `json:"time_offset"`
+	TimeOffset        int    `json:"time_offset"`
 }
 
 func (c *Client) CreateScheduleTasks(identifier string, scheduleID int64, task Task) error {

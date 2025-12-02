@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"iter"
 	"net/http"
+	"slices"
 )
 
 const Version = "1.0.0"
@@ -104,4 +106,28 @@ func validate(res *http.Response) ([]byte, error) {
 
 		return nil, errs
 	}
+}
+
+type Object[T any] struct {
+	Object     string `json:"object"`
+	Attributes T      `json:"attributes"`
+}
+
+type ObjectList[T any] struct {
+	Object string      `json:"object"`
+	Data   []Object[T] `json:"data"`
+}
+
+func (l *ObjectList[T]) IterObjects() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, obj := range l.Data {
+			if !yield(obj.Attributes) {
+				return
+			}
+		}
+	}
+}
+
+func (l *ObjectList[T]) Objects() []T {
+	return slices.Collect(l.IterObjects())
 }
