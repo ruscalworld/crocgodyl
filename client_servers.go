@@ -961,7 +961,7 @@ type Cron struct {
 	Month      string `json:"month"`
 }
 
-type ScheduleAttributes struct {
+type ClientSchedule struct {
 	ID             int        `json:"id"`
 	Name           string     `json:"name"`
 	Cron           Cron       `json:"cron"`
@@ -975,10 +975,10 @@ type ScheduleAttributes struct {
 }
 
 type SchedulesData struct {
-	Attributes ScheduleAttributes `json:"attributes"`
+	Attributes ClientSchedule `json:"attributes"`
 }
 
-func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
+func (c *Client) GetSchedules(identifier string) ([]*ClientSchedule, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -990,18 +990,15 @@ func (c *Client) GetSchedules(identifier string) ([]*SchedulesData, error) {
 		return nil, err
 	}
 
-	var model struct {
-		Data []*SchedulesData `json:"data"`
-	}
-
+	var model ObjectList[*ClientSchedule]
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return model.Data, nil
+	return model.Objects(), nil
 }
 
-func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ScheduleAttributes, error) {
+func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ClientSchedule, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules/%d", identifier, scheduleID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1013,10 +1010,7 @@ func (c *Client) GetSchedule(identifier string, scheduleID int64) (*ScheduleAttr
 		return nil, err
 	}
 
-	var model struct {
-		Attributes ScheduleAttributes `json:"attributes"`
-	}
-
+	var model Object[ClientSchedule]
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
@@ -1035,7 +1029,7 @@ type UpdateScheduleParams struct {
 	OnlyWhenOnline bool   `json:"only_when_online"`
 }
 
-func (c *Client) CreateSchedules(identifier string, newSchedule UpdateScheduleParams) error {
+func (c *Client) CreateSchedule(identifier string, newSchedule UpdateScheduleParams) (*ClientSchedule, error) {
 	data, _ := json.Marshal(newSchedule)
 	body := bytes.Buffer{}
 	body.Write(data)
@@ -1043,11 +1037,20 @@ func (c *Client) CreateSchedules(identifier string, newSchedule UpdateSchedulePa
 	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/schedules", identifier), &body)
 	res, err := c.Http.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = validate(res)
-	return err
+	buf, err := validate(res)
+	if err != nil {
+		return nil, err
+	}
+
+	var model Object[ClientSchedule]
+	if err = json.Unmarshal(buf, &model); err != nil {
+		return nil, err
+	}
+
+	return &model.Attributes, nil
 }
 
 func (c *Client) UpdateSchedule(identifier string, updatedSchedule UpdateScheduleParams, scheduleID int64) error {
