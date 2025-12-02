@@ -843,10 +843,15 @@ func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 	return err
 }
 
+type DockerImage struct {
+	Label string
+	Image string
+}
+
 type Meta struct {
-	StartupCommand    string            `json:"startup_command"`
-	DockerImages      map[string]string `json:"docker_images"`
-	RawStartupCommand string            `json:"raw_startup_command"`
+	StartupCommand    string        `json:"startup_command"`
+	DockerImages      []DockerImage `json:"docker_images"`
+	RawStartupCommand string        `json:"raw_startup_command"`
 }
 
 func (c *Client) GetStartupInfo(identifier string) (*Meta, error) {
@@ -887,20 +892,17 @@ func (c *Client) UpdateDockerImage(identifier string, dockerImage string) error 
 	return err
 }
 
-type EggVariables struct {
-	Object     string `json:"object"`
-	Attributes struct {
-		Name         string `json:"name"`
-		Description  string `json:"description"`
-		EnvVariable  string `json:"env_variable"`
-		DefaultValue string `json:"default_value"`
-		ServerValue  string `json:"server_value"`
-		IsEditable   bool   `json:"is_editable"`
-		Rules        string `json:"rules"`
-	} `json:"attributes"`
+type StartupEggVariable struct {
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	EnvVariable  string `json:"env_variable"`
+	DefaultValue string `json:"default_value"`
+	ServerValue  string `json:"server_value"`
+	IsEditable   bool   `json:"is_editable"`
+	Rules        string `json:"rules"`
 }
 
-func (c *Client) GetVariables(identifier string) ([]*EggVariables, error) {
+func (c *Client) GetVariables(identifier string) ([]*StartupEggVariable, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/startup", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -913,14 +915,21 @@ func (c *Client) GetVariables(identifier string) ([]*EggVariables, error) {
 	}
 
 	var model struct {
-		Data []*EggVariables `json:"data"`
+		Data []struct {
+			Attributes *StartupEggVariable `json:"attributes"`
+		} `json:"data"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
 		return nil, err
 	}
 
-	return model.Data, nil
+	var variables []*StartupEggVariable
+	for _, s := range model.Data {
+		variables = append(variables, s.Attributes)
+	}
+
+	return variables, nil
 }
 
 func (c *Client) PutVariable(identifier, key, value string) error {
