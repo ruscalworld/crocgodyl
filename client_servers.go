@@ -844,8 +844,8 @@ func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 }
 
 type DockerImage struct {
-	Label string
-	Image string
+	Label string `json:"label"`
+	Image string `json:"image"`
 }
 
 type Meta struct {
