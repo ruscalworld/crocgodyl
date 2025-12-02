@@ -843,15 +843,10 @@ func (c *Client) DeleteAllocation(identifier string, allocationID int64) error {
 	return err
 }
 
-type DockerImage struct {
-	Label string `json:"label"`
-	Image string `json:"image"`
-}
-
 type Meta struct {
-	StartupCommand    string        `json:"startup_command"`
-	DockerImages      []DockerImage `json:"docker_images"`
-	RawStartupCommand string        `json:"raw_startup_command"`
+	StartupCommand    string            `json:"startup_command"`
+	DockerImages      map[string]string `json:"docker_images"`
+	RawStartupCommand string            `json:"raw_startup_command"`
 }
 
 func (c *Client) GetStartupInfo(identifier string) (*Meta, error) {
