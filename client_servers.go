@@ -953,23 +953,25 @@ func (c *Client) Reinstall(identifier string) error {
 	return err
 }
 
+type Cron struct {
+	DayOfWeek  string `json:"day_of_week"`
+	DayOfMonth string `json:"day_of_month"`
+	Hour       string `json:"hour"`
+	Minute     string `json:"minute"`
+	Month      string `json:"month"`
+}
+
 type ScheduleAttributes struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Cron struct {
-		DayOfWeek  string `json:"day_of_week"`
-		DayOfMonth string `json:"day_of_month"`
-		Hour       string `json:"hour"`
-		Minute     string `json:"minute"`
-		Month      string `json:"month"`
-	} `json:"cron"`
-	IsActive       bool        `json:"is_active"`
-	IsProcessing   bool        `json:"is_processing"`
-	OnlyWhenOnline bool        `json:"only_when_online"`
-	LastRunAt      interface{} `json:"last_run_at"`
-	NextRunAt      time.Time   `json:"next_run_at"`
-	CreatedAt      time.Time   `json:"created_at"`
-	UpdatedAt      time.Time   `json:"updated_at"`
+	ID             int        `json:"id"`
+	Name           string     `json:"name"`
+	Cron           Cron       `json:"cron"`
+	IsActive       bool       `json:"is_active"`
+	IsProcessing   bool       `json:"is_processing"`
+	OnlyWhenOnline bool       `json:"only_when_online"`
+	LastRunAt      *time.Time `json:"last_run_at"`
+	NextRunAt      time.Time  `json:"next_run_at"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 type SchedulesData struct {
