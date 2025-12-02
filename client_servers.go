@@ -974,10 +974,6 @@ type ClientSchedule struct {
 	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
-type SchedulesData struct {
-	Attributes ClientSchedule `json:"attributes"`
-}
-
 func (c *Client) GetSchedules(identifier string) ([]*ClientSchedule, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/schedules", identifier), nil)
 	res, err := c.Http.Do(req)
