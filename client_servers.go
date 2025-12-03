@@ -1196,11 +1196,11 @@ func (c *Client) DeleteScheduleTask(identifier string, scheduleID int64, taskID 
 	return err
 }
 
-type BackupInfo struct {
+type ClientBackup struct {
 	Uuid         string    `json:"uuid"`
 	Name         string    `json:"name"`
 	IgnoredFiles []string  `json:"ignored_files"`
-	Sha256Hash   string    `json:"sha256_hash"`
+	Checksum     string    `json:"checksum"`
 	Bytes        int       `json:"bytes"`
 	CreatedAt    time.Time `json:"created_at"`
 	CompletedAt  time.Time `json:"completed_at"`
@@ -1208,7 +1208,7 @@ type BackupInfo struct {
 	IsLocked     bool      `json:"is_locked"`
 }
 
-func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
+func (c *Client) GetBackups(identifier string) ([]*ClientBackup, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/backups", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1222,7 +1222,7 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 
 	var model struct {
 		Data []struct {
-			Attributes *BackupInfo `json:"attributes"`
+			Attributes *ClientBackup `json:"attributes"`
 		} `json:"data"`
 	}
 
@@ -1230,7 +1230,7 @@ func (c *Client) GetBackups(identifier string) ([]*BackupInfo, error) {
 		return nil, err
 	}
 
-	var backups []*BackupInfo
+	var backups []*ClientBackup
 	for _, s := range model.Data {
 		backups = append(backups, s.Attributes)
 	}
@@ -1258,7 +1258,7 @@ func (c *Client) CreateBackup(identifier string, name string, ignored string, is
 	return err
 }
 
-func (c *Client) GetBackup(identifier string, backupID string) (*BackupInfo, error) {
+func (c *Client) GetBackup(identifier string, backupID string) (*ClientBackup, error) {
 	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/backups/%s", identifier, backupID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
@@ -1271,7 +1271,7 @@ func (c *Client) GetBackup(identifier string, backupID string) (*BackupInfo, err
 	}
 
 	var model struct {
-		Attributes BackupInfo `json:"attributes"`
+		Attributes ClientBackup `json:"attributes"`
 	}
 
 	if err = json.Unmarshal(buf, &model); err != nil {
