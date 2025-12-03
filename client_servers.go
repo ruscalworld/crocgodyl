@@ -1197,15 +1197,15 @@ func (c *Client) DeleteScheduleTask(identifier string, scheduleID int64, taskID 
 }
 
 type ClientBackup struct {
-	Uuid         string    `json:"uuid"`
-	Name         string    `json:"name"`
-	IgnoredFiles []string  `json:"ignored_files"`
-	Checksum     string    `json:"checksum"`
-	Bytes        int       `json:"bytes"`
-	CreatedAt    time.Time `json:"created_at"`
-	CompletedAt  time.Time `json:"completed_at"`
-	IsSuccessful bool      `json:"is_successful"`
-	IsLocked     bool      `json:"is_locked"`
+	Uuid         string     `json:"uuid"`
+	Name         string     `json:"name"`
+	IgnoredFiles []string   `json:"ignored_files"`
+	Checksum     string     `json:"checksum"`
+	Bytes        int        `json:"bytes"`
+	CreatedAt    time.Time  `json:"created_at"`
+	CompletedAt  *time.Time `json:"completed_at"`
+	IsSuccessful bool       `json:"is_successful"`
+	IsLocked     bool       `json:"is_locked"`
 }
 
 func (c *Client) GetBackups(identifier string) ([]*ClientBackup, error) {
