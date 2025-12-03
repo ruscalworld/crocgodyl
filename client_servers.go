@@ -219,7 +219,7 @@ type ClientDatabase struct {
 }
 
 func (c *Client) GetServerDatabases(identifier string) ([]*ClientDatabase, error) {
-	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/command?include=password", identifier), nil)
+	req := c.newRequest("GET", fmt.Sprintf("/servers/%s/databases?include=password", identifier), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return nil, err
