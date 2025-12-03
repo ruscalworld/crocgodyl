@@ -1309,7 +1309,7 @@ func (c *Client) DownloadBackup(identifier string, backupID string) (*DownloadBa
 }
 
 func (c *Client) LockBackup(identifier string, backupID string) error {
-	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/backups/%s/lock	", identifier, backupID), nil)
+	req := c.newRequest("POST", fmt.Sprintf("/servers/%s/backups/%s/lock", identifier, backupID), nil)
 	res, err := c.Http.Do(req)
 	if err != nil {
 		return err
